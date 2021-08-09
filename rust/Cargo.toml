@@ -55,3 +55,6 @@ blst = ["filecoin-proofs-api/blst", "bellperson/blst", "storage-proofs-porep/bls
 blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 gpu = ["filecoin-proofs-api/gpu", "bellperson/gpu", "storage-proofs-porep/gpu"]
 multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+
+[patch.crates-io]
+filecoin-proofs = { git = "https://github.com/zhiquan911/rust-fil-proofs", branch = "mzqdev-8.0.3", version = "8.0.4" }

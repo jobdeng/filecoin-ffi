@@ -2219,3 +2219,8 @@ dependencies = [
  "syn 1.0.73",
  "synstructure",
 ]
+
+[[patch.unused]]
+name = "filecoin-proofs"
+version = "8.0.4"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#8241e4788242467ccd7aeb647431b32779f02d87"
