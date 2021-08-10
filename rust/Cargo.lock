@@ -814,6 +814,7 @@ dependencies = [
  "fff",
  "ffi-toolkit",
  "fil_logger",
+ "filecoin-proofs",
  "filecoin-proofs-api",
  "filepath",
  "groupy",
@@ -824,7 +825,7 @@ dependencies = [
  "rayon",
  "rust-gpu-tools",
  "serde_json",
- "storage-proofs-porep",
+ "storage-proofs-porep 8.0.2",
  "tempfile",
 ]
 
@@ -848,10 +849,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "filecoin-hashers"
+version = "3.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#8241e4788242467ccd7aeb647431b32779f02d87"
+dependencies = [
+ "anyhow",
+ "bellperson",
+ "fff",
+ "generic-array 0.14.4",
+ "hex",
+ "lazy_static",
+ "merkletree",
+ "neptune",
+ "rand 0.7.3",
+ "serde",
+ "sha2 0.9.5",
+]
+
+[[package]]
 name = "filecoin-proofs"
-version = "8.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e21d7e3bf0c9980c50f36c1e668a88796c34c5bf4dc4d0158af33d4f8a578d9"
+version = "8.0.4"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -863,8 +881,8 @@ dependencies = [
  "byteorder 1.4.3",
  "fff",
  "fil_logger",
- "filecoin-hashers",
- "fr32",
+ "filecoin-hashers 3.0.3",
+ "fr32 1.0.3",
  "generic-array 0.14.4",
  "groupy",
  "hex",
@@ -873,14 +891,15 @@ dependencies = [
  "log",
  "memmap",
  "merkletree",
+ "once_cell",
  "rand 0.7.3",
  "rand_xorshift",
  "rayon",
  "serde",
  "serde_json",
  "sha2 0.9.5",
- "storage-proofs-core",
- "storage-proofs-porep",
+ "storage-proofs-core 8.0.3",
+ "storage-proofs-porep 8.0.3",
  "storage-proofs-post",
  "typenum",
 ]
@@ -894,11 +913,11 @@ dependencies = [
  "anyhow",
  "bellperson",
  "bincode",
- "filecoin-hashers",
+ "filecoin-hashers 3.0.2",
  "filecoin-proofs",
- "fr32",
+ "fr32 1.0.2",
  "serde",
- "storage-proofs-core",
+ "storage-proofs-core 8.0.2",
 ]
 
 [[package]]
@@ -929,6 +948,19 @@ name = "fr32"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dedf8113967195ca3c674f0e1c9793cc686bf8a80efc84d1de8dd045c3ab0553"
+dependencies = [
+ "anyhow",
+ "bellperson",
+ "byte-slice-cast",
+ "byteorder 1.4.3",
+ "fff",
+ "thiserror",
+]
+
+[[package]]
+name = "fr32"
+version = "1.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -1381,6 +1413,12 @@ checksum = "b4072920739958adeec5abedec51af70febc58f7fff0601aaa0827c1f3c8fefd"
 dependencies = [
  "num",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "692fcb63b64b1758029e0a96ee63e049ce8c5948587f2f7208df04625e5f6b56"
 
 [[package]]
 name = "opaque-debug"
@@ -1867,6 +1905,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sha2raw"
+version = "3.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
+dependencies = [
+ "block-buffer 0.9.0",
+ "byteorder 1.4.3",
+ "cpuid-bool",
+ "digest 0.9.0",
+ "fake-simd",
+ "lazy_static",
+ "opaque-debug 0.3.0",
+ "sha2-asm",
+]
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1887,8 +1940,46 @@ dependencies = [
  "byteorder 1.4.3",
  "config",
  "fff",
- "filecoin-hashers",
- "fr32",
+ "filecoin-hashers 3.0.2",
+ "fr32 1.0.2",
+ "fs2",
+ "generic-array 0.14.4",
+ "hex",
+ "itertools 0.9.0",
+ "lazy_static",
+ "log",
+ "memmap",
+ "merkletree",
+ "neptune",
+ "num_cpus",
+ "rand 0.7.3",
+ "rand_chacha 0.2.2",
+ "rayon",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.9.5",
+ "tempfile",
+ "thiserror",
+ "toml",
+]
+
+[[package]]
+name = "storage-proofs-core"
+version = "8.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
+dependencies = [
+ "aes",
+ "anyhow",
+ "bellperson",
+ "blake2b_simd",
+ "blake2s_simd",
+ "block-modes",
+ "byteorder 1.4.3",
+ "config",
+ "fff",
+ "filecoin-hashers 3.0.3",
+ "fr32 1.0.3",
  "fs2",
  "generic-array 0.14.4",
  "hex",
@@ -1926,8 +2017,8 @@ dependencies = [
  "digest 0.9.0",
  "fdlimit",
  "fff",
- "filecoin-hashers",
- "fr32",
+ "filecoin-hashers 3.0.2",
+ "fr32 1.0.2",
  "generic-array 0.14.4",
  "hex",
  "hwloc",
@@ -1946,15 +2037,51 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.9.5",
- "sha2raw",
- "storage-proofs-core",
+ "sha2raw 3.0.2",
+ "storage-proofs-core 8.0.2",
+]
+
+[[package]]
+name = "storage-proofs-porep"
+version = "8.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
+dependencies = [
+ "anyhow",
+ "bellperson",
+ "bincode",
+ "byte-slice-cast",
+ "byteorder 1.4.3",
+ "crossbeam 0.8.1",
+ "digest 0.9.0",
+ "fdlimit",
+ "fff",
+ "filecoin-hashers 3.0.3",
+ "fr32 1.0.3",
+ "generic-array 0.14.4",
+ "hex",
+ "lazy_static",
+ "libc",
+ "log",
+ "mapr",
+ "merkletree",
+ "neptune",
+ "num-bigint 0.2.6",
+ "num-traits 0.2.14",
+ "num_cpus",
+ "pretty_assertions",
+ "rand 0.7.3",
+ "rayon",
+ "serde",
+ "serde_json",
+ "sha2 0.9.5",
+ "sha2raw 3.0.3",
+ "storage-proofs-core 8.0.3",
 ]
 
 [[package]]
 name = "storage-proofs-post"
-version = "8.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8379954982a7669bef1b272bef7d0158ae8edddaf60a83e31e142aabbce40935"
+version = "8.0.3"
+source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#14afe569359011cf5bafa1670a71d4fe880d8d80"
 dependencies = [
  "anyhow",
  "bellperson",
@@ -1963,8 +2090,8 @@ dependencies = [
  "byteorder 1.4.3",
  "crossbeam 0.8.1",
  "fff",
- "filecoin-hashers",
- "fr32",
+ "filecoin-hashers 3.0.3",
+ "fr32 1.0.3",
  "generic-array 0.14.4",
  "hex",
  "log",
@@ -1975,7 +2102,7 @@ dependencies = [
  "rayon",
  "serde",
  "sha2 0.9.5",
- "storage-proofs-core",
+ "storage-proofs-core 8.0.3",
 ]
 
 [[package]]
@@ -2219,8 +2346,3 @@ dependencies = [
  "syn 1.0.73",
  "synstructure",
 ]
-
-[[patch.unused]]
-name = "filecoin-proofs"
-version = "8.0.4"
-source = "git+https://github.com/zhiquan911/rust-fil-proofs?branch=mzqdev-8.0.3#8241e4788242467ccd7aeb647431b32779f02d87"
