@@ -124,9 +124,8 @@ checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
 
 [[package]]
 name = "bellperson"
-version = "0.14.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7edb7b07cab660137847825b90d1c88e82907689ee1e935eb2101579bc649e0a"
+version = "0.14.3"
+source = "git+https://github.com/zhiquan911/bellperson?branch=mzqdev-0.14#88befed63a9b9aa2b33d4d07f6c10b6a0d92c624"
 dependencies = [
  "bincode",
  "bit-vec",
