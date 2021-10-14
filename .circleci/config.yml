@@ -36,11 +36,11 @@ jobs:
       - run:
           command: make go-lint
 
-  build_and_test_linux_cgo_bindings_pairing:
+  build_and_test_linux_cgo_bindings:
     parameters:
       run_leak_detector:
         type: boolean
-        default: false
+        default: true
     executor: golang
     working_directory: ~/go/src/github.com/filecoin-project/filecoin-ffi
     steps:
@@ -53,27 +53,9 @@ jobs:
       - run_tests:
           run_leak_detector: << parameters.run_leak_detector >>
 
-  build_and_test_linux_cgo_bindings_blst:
-    parameters:
-      run_leak_detector:
-        type: boolean
-        default: false
-    executor: golang
-    working_directory: ~/go/src/github.com/filecoin-project/filecoin-ffi
-    steps:
-      - configure_environment_variables
-      - prepare
-      - build_project:
-          blst: true
-      - restore_parameter_cache
-      - obtain_filecoin_parameters
-      - save_parameter_cache
-      - run_tests:
-          run_leak_detector: << parameters.run_leak_detector >>
-
   build_darwin_cgo_bindings:
     macos:
-      xcode: "10.0.0"
+      xcode: "12.5.0"
     working_directory: ~/go/src/github.com/filecoin-project/filecoin-ffi
     resource_class: large
     steps:
@@ -83,6 +65,12 @@ jobs:
       - prepare:
           linux: false
           darwin: true
+      - run: cd rust && rustup install $(cat rust-toolchain)
+      - run: cd rust && rustup target add x86_64-apple-darwin --toolchain $(cat rust-toolchain)
+      - run: cd rust && rustup target add aarch64-apple-darwin --toolchain $(cat rust-toolchain)
+      - run: cd rust && rustup default $(cat rust-toolchain)
+      - run: cd rust && cargo fetch
+      - run: cd rust && cargo install cargo-lipo
       - build_project
       - compile_tests
       - ensure_generated_cgo_up_to_date
@@ -94,7 +82,7 @@ jobs:
       - publish_release
   publish_darwin_staticlib:
     macos:
-      xcode: "10.0.0"
+      xcode: "12.5.0"
     working_directory: ~/crate
     steps:
       - configure_environment_variables:
@@ -104,9 +92,12 @@ jobs:
           linux: false
           darwin: true
       - run: cd rust && rustup install $(cat rust-toolchain)
+      - run: cd rust && rustup target add x86_64-apple-darwin --toolchain $(cat rust-toolchain)
+      - run: cd rust && rustup target add aarch64-apple-darwin --toolchain $(cat rust-toolchain)
       - run: cd rust && rustup default $(cat rust-toolchain)
       - run: cd rust && cargo fetch
-      - publish_release
+      - run: cd rust && cargo install cargo-lipo
+      - publish_darwin_release
   cargo_fetch:
     executor: rust
     working_directory: /mnt/crate
@@ -158,11 +149,8 @@ jobs:
       - run: cd rust && rustup component add clippy
       - run: cd rust && cargo fetch
       - run:
-          name: Run cargo clippy (pairing)
-          command: cd rust && cargo +$(cat rust-toolchain) clippy --all-targets -- -D warnings
-      - run:
-          name: Run cargo clippy (blst)
-          command: cd rust && cargo +$(cat rust-toolchain) clippy --all-targets --no-default-features --features multicore-sdr --features blst -- -D warnings
+          name: Run cargo clippy
+          command: cd rust && cargo +$(cat rust-toolchain) clippy --all-targets --no-default-features --features multicore-sdr,blst-portable,opencl -- -D warnings
 
 workflows:
   version: 2
@@ -180,18 +168,9 @@ workflows:
             - cargo_fetch
       - gofmt
       - go_lint
-      - build_and_test_linux_cgo_bindings_pairing:
-          run_leak_detector: true
-      - build_and_test_linux_cgo_bindings_pairing:
-          filters:
-            branches:
-              ignore:
-                - master
+      - build_and_test_linux_cgo_bindings:
           run_leak_detector: false
-
-      - build_and_test_linux_cgo_bindings_blst:
-          run_leak_detector: true
-      - build_and_test_linux_cgo_bindings_blst:
+      - build_and_test_linux_cgo_bindings:
           filters:
             branches:
               ignore:
@@ -200,11 +179,7 @@ workflows:
 
       - publish_linux_staticlib
       - build_darwin_cgo_bindings
-      - publish_darwin_staticlib:
-          filters:
-            branches:
-              only:
-                - master
+      - publish_darwin_staticlib
 
 commands:
   prepare:
@@ -224,6 +199,7 @@ commands:
           steps:
             - go/install-ssh
             - go/install: {package: git}
+            - run: sudo apt update
             - run: sudo apt-get update
             - run: sudo apt-get install -y jq valgrind ocl-icd-opencl-dev clang libssl-dev libhwloc-dev
             - run: curl https://sh.rustup.rs -sSf | sh -s -- -y
@@ -254,49 +230,42 @@ commands:
   publish_release:
     steps:
       - run:
-          name: Build and publish the standard release (pairing)
+          name: Build and publish the standard release
           command: |
             cd rust
 
-            TARBALL_PATH="/tmp/${CIRCLE_PROJECT_REPONAME}-$(uname)-standard-pairing.tar.gz"
-            RELEASE_NAME="${CIRCLE_PROJECT_REPONAME}-$(uname)-standard-pairing"
+            TARBALL_PATH="/tmp/${CIRCLE_PROJECT_REPONAME}-$(uname)-standard.tar.gz"
+            RELEASE_NAME="${CIRCLE_PROJECT_REPONAME}-$(uname)-standard"
 
             # Note: the blst dependency uses the portable configuration for maximum compatibility
-            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) --verbose --locked --no-default-features --features multicore-sdr --features pairing,gpu --features blst-portable
+            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) build --verbose --locked --no-default-features --features multicore-sdr,opencl,blst-portable
             ./scripts/package-release.sh $TARBALL_PATH
             ./scripts/publish-release.sh $TARBALL_PATH $RELEASE_NAME
       - run:
-          name: Build and publish the standard release (blst)
-          command: |
-            cd rust
-
-            TARBALL_PATH="/tmp/${CIRCLE_PROJECT_REPONAME}-$(uname)-standard-blst.tar.gz"
-            RELEASE_NAME="${CIRCLE_PROJECT_REPONAME}-$(uname)-standard-blst"
-
-            # Note: the blst dependency uses the portable configuration for maximum compatibility
-            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) --verbose --locked --no-default-features --features multicore-sdr --features blst,gpu --features blst-portable
-            ./scripts/package-release.sh $TARBALL_PATH
-            ./scripts/publish-release.sh $TARBALL_PATH $RELEASE_NAME
-      - run:
-          name: Build the optimized release (pairing)
+          name: Build the optimized release
           command: |
             cd rust
 
             TARBALL_PATH="/tmp/${CIRCLE_PROJECT_REPONAME}-$(uname)-optimized.tar.gz"
             RUSTFLAGS="-C target-feature=$(cat rustc-target-features-optimized.json | jq -r '.[].rustc_target_feature' | tr '\n' ',')"
 
-            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) --verbose --locked --no-default-features --features multicore-sdr --features pairing,gpu
+            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) build --verbose --locked --no-default-features --features multicore-sdr,opencl
             ./scripts/package-release.sh $TARBALL_PATH
+
+  publish_darwin_release:
+    steps:
       - run:
-          name: Build the optimized release (blst)
+          name: Build and publish the universal standard release
           command: |
             cd rust
 
-            TARBALL_PATH="/tmp/${CIRCLE_PROJECT_REPONAME}-$(uname)-optimized.tar.gz"
-            RUSTFLAGS="-C target-feature=$(cat rustc-target-features-optimized.json | jq -r '.[].rustc_target_feature' | tr '\n' ',')"
+            RELEASE_NAME="${CIRCLE_PROJECT_REPONAME}-$(uname)-standard"
+            TARBALL_PATH="/tmp/${RELEASE_NAME}.tar.gz"
 
-            ./scripts/build-release.sh filcrypto $(cat ./rust-toolchain) --verbose --locked --all
+            # Note: the blst dependency uses the portable configuration for maximum compatibility
+            ./scripts/build-release.sh filcrypto $(cat rust-toolchain) lipo --targets x86_64-apple-darwin,aarch64-apple-darwin --verbose --locked --no-default-features --features multicore-sdr,opencl,blst-portable
             ./scripts/package-release.sh $TARBALL_PATH
+            ./scripts/publish-release.sh $TARBALL_PATH $RELEASE_NAME
   configure_environment_variables:
     parameters:
       linux:
@@ -331,28 +300,14 @@ commands:
           cd $(mktemp -d)
           GOPATH=/tmp GO111MODULE=off go get github.com/filecoin-project/go-paramfetch/paramfetch
           GOPATH=/tmp GO111MODULE=off go build -o go-paramfetch github.com/filecoin-project/go-paramfetch/paramfetch
-          ./go-paramfetch 2048 "${DIR}/parameters.json"
+          ./go-paramfetch 2048 "${DIR}/parameters.json" "${DIR}/srs-inner-product.json"
 
   build_project:
-    parameters:
-      blst:
-        default: false
-        description: build with blst backend?
-        type: boolean
     steps:
-      - when:
-          condition: << parameters.blst >>
-          steps:
-            - run:
-                name: Build project (blst)
-                command: FFI_USE_BLST=1 make
-      - unless:
-          condition: << parameters.blst >>
-          steps:
-            - run:
-                name: Build project (pairing)
-                command: make
-                
+      - run:
+          name: Build project
+          command: make
+
       - run:
           name: Build project without CGO
           command: env CGO_ENABLED=0 go build .

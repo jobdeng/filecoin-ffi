@@ -26,12 +26,6 @@ The disadvantage to downloading the pre-built binary is that it will not be opti
 
 To opt out of downloading precompiled assets, set `FFI_BUILD_FROM_SOURCE=1`:
 
-```shell
-rm .install-filcrypto \
-    ; make clean \
-    ; FFI_BUILD_FROM_SOURCE=1 make
-```
-
 To allow portable building of the `blst` dependency, set `FFI_USE_BLST_PORTABLE=1`:
 
 ```shell
@@ -45,7 +39,17 @@ By default, a 'gpu' option is used in the proofs library.  This feature is also 
 ```shell
 rm .install-filcrypto \
     ; make clean \
-    ; FFI_BUILD_FROM_SOURCE=1 FFI_USE_BLST=1 FFI_USE_GPU=0 make
+    ; FFI_BUILD_FROM_SOURCE=1 FFI_USE_GPU=0 make
+```
+
+#### Experimental CUDA build support
+
+An experimental 'gpu' option using CUDA can be used in the proofs library.  This feature is disabled by default (opencl is the default, when `FFI_USE_GPU=1` is set.).  To enable building with the 'gpu' CUDA dependency, set `FFI_USE_CUDA=1` when building from source.
+
+```shell
+rm .install-filcrypto \
+    ; make clean \
+    ; FFI_BUILD_FROM_SOURCE=1 FFI_USE_CUDA=1 make
 ```
 
 By default, a 'multicore-sdr' option is used in the proofs library.  This feature is also used in FFI unless explicitly disabled.  To disable building with the 'multicore-sdr' dependency, set `FFI_USE_MULTICORE_SDR=0`:
