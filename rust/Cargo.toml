@@ -54,3 +54,10 @@ blst-portable = ["bls-signatures/blst-portable", "blstrs/portable"]
 opencl = ["filecoin-proofs-api/opencl", "bellperson/opencl", "storage-proofs-porep/opencl", "rust-gpu-tools/opencl"]
 cuda = ["filecoin-proofs-api/cuda", "bellperson/cuda", "storage-proofs-porep/cuda", "rust-gpu-tools/cuda"]
 multicore-sdr = ["storage-proofs-porep/multicore-sdr"]
+
+
+# patch dependencies
+[patch.crates-io]
+bellperson = { git = "https://github.com/jobdeng/bellperson", branch = "job/v0.18.0" }
+rust-gpu-tools = { git = "https://github.com/jobdeng/rust-gpu-tools", branch = "job/v0.5.0" }
+filecoin-proofs-api = { git = "https://github.com/jobdeng/rust-filecoin-proofs-api", branch = "job/v10.1.0", version = "10.1.0" }
