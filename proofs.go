@@ -1,4 +1,5 @@
-//+build cgo
+//go:build cgo
+// +build cgo
 
 package ffi
 
@@ -20,7 +21,11 @@ import (
 	"golang.org/x/xerrors"
 
 	"github.com/filecoin-project/filecoin-ffi/generated"
+
+	logging "github.com/ipfs/go-log/v2"
 )
+
+var log = logging.Logger("proofs")
 
 // VerifySeal returns true if the sealing operation from which its inputs were
 // derived was valid, and false if not.
@@ -349,6 +354,8 @@ func SealPreCommitPhase1(
 		return nil, err
 	}
 
+	log.Infof("proofs.SealPreCommitPhase1 - sectorNum: %d, minerID: %+v, proverID: %+v, pieces: %+v, filPublicPieceInfos: %+v", sectorNum, minerID, proverID, pieces, filPublicPieceInfos)
+
 	resp := generated.FilSealPreCommitPhase1(sp, cacheDirPath, stagedSectorPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), filPublicPieceInfos, filPublicPieceInfosLen)
 	resp.Deref()
 
@@ -384,6 +391,8 @@ func SealPreCommitPhase2(
 	if errCommdSize != nil {
 		return cid.Undef, cid.Undef, errCommdSize
 	}
+
+	log.Infof("SealPreCommitPhase2 - commD: %+v, commR: %+v", commD, commR)
 
 	return commR, commD, nil
 }
@@ -426,6 +435,8 @@ func SealCommitPhase1(
 		return nil, err
 	}
 
+	log.Infof("SealCommitPhase1 - minerID: %+v, proverID: %+v, commD: %+v, commR: %+v, pieces: %+v, filPublicPieceInfo: %+v", minerID, proverID, commD, commR, pieces, filPublicPieceInfos)
+
 	resp := generated.FilSealCommitPhase1(sp, commR, commD, cacheDirPath, sealedSectorPath, uint64(sectorNum), proverID, to32ByteArray(ticket), to32ByteArray(seed), filPublicPieceInfos, filPublicPieceInfosLen)
 	resp.Deref()
 
@@ -448,6 +459,8 @@ func SealCommitPhase2(
 	if err != nil {
 		return nil, err
 	}
+
+	log.Infof("SealCommitPhase2 - proverID: %+v", proverID)
 
 	resp := generated.FilSealCommitPhase2(phase1Output, uint(len(phase1Output)), uint64(sectorNum), proverID)
 	resp.Deref()

@@ -212,7 +212,7 @@ pub unsafe extern "C" fn fil_seal_pre_commit_phase1(
     catch_panic_response(|| {
         init_log();
 
-        info!("seal_pre_commit_phase1: start");
+        info!("C.seal_pre_commit_phase1: start");
 
         let slice: &[fil_PublicPieceInfo] = std::slice::from_raw_parts(pieces_ptr, pieces_len);
         let public_pieces: Vec<PieceInfo> =
